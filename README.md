@@ -77,3 +77,31 @@ for (a in names(sets)) {
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+``` r
+
+
+
+# compare runtimes with alternative routines
+microbenchmark::microbenchmark(pcalg::optAdjSet(t(dag), x, y),
+                               adjset(dag, x-1, y-1, "o")+1,
+                               check = "equivalent")
+#> Unit: microseconds
+#>                                expr      min        lq       mean    median
+#>      pcalg::optAdjSet(t(dag), x, y) 2691.269 2737.7595 2911.78811 2787.0810
+#>  adjset(dag, x - 1, y - 1, "o") + 1   13.207   15.0745   23.11478   23.1685
+#>         uq      max neval cld
+#>  2857.1695 5357.698   100   b
+#>    27.5525   67.641   100  a
+
+microbenchmark::microbenchmark(which(dag[, x] == 1),
+                               adjset(dag, x-1, y-1, "pa")+1,
+                               check = "equivalent")
+#> Unit: microseconds
+#>                                 expr   min     lq    mean median    uq    max
+#>                 which(dag[, x] == 1) 1.730 1.7985 1.94152  1.846 1.886  8.221
+#>  adjset(dag, x - 1, y - 1, "pa") + 1 3.036 3.1340 3.57394  3.192 3.282 36.834
+#>  neval cld
+#>    100  a 
+#>    100   b
+```

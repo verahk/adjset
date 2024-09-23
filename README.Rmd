@@ -71,4 +71,16 @@ for (a in names(sets)) {
                   nodeAttrs = list(fillcolor = tmp),
                   main = a)
 }
+
+
+
+# compare runtimes with alternative routines
+microbenchmark::microbenchmark(pcalg::optAdjSet(t(dag), x, y),
+                               adjset(dag, x-1, y-1, "o")+1,
+                               check = "equivalent")
+
+microbenchmark::microbenchmark(which(dag[, x] == 1),
+                               adjset(dag, x-1, y-1, "pa")+1,
+                               check = "equivalent")
 ```
+
