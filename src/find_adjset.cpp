@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 
-//' Identify adjustment sets
+//' Identify adjustment set
 //'
 //' Identify different sets of nodes in a DAG valid for adjustment with respect to 
 //' a cause node X and a effect node Y. Based on Zander and Liśkiewicz (2020) algorithm 
@@ -12,58 +12,39 @@ using namespace Rcpp;
 //' @name adjset
 //' @param G a n-by-n adjacency matrix of a graph. `G[x, y] = 1` if there is an edge from node `x` to `y`, zero otherwise.
 //' @param x,y (integer)
-//'   column position of the cause and effect variable, respectively (using zero-based index, from 0 to n-1).
+//'   column position of the cause and effect variable, respectively (zero-based index, from 0 to n-1).
 //' @param Z (integer vector)
-//'    column positions of conditioning variables (using zero-based index, from 0 to n-1).
+//'    column positions of conditioning variables (zero-based index, from 0 to n-1).
 //' @param A (logical vector)
-//'   indicates the subset of nodes paths must be contained in.
+//'   indicates a subset of nodes paths must be contained in.
 //'   The search along a path ends if visiting a node `i` such that `A[i] = FALSE`.
 //' @param name (string) name of adjustment set, see details.
-//' @param dmat (optional) a n-by-n adjacency matrix such that `dmat(x, y) = 1` if `x` is an ancestor of `y` in `G`.
+//' @param dmat (optional) a n-by-n adjacency matrix such that `dmat[x, y] = 1` if `x` is an ancestor of `y` in `G`.
 //'   Added as an optional argument for speed. If not specified, `areDescendants` and `areAncestors` are called to 
 //'   identify the relevant relationships.
 //' @param Gx the backdoor graph of `G` w.r.t. `x`.
 //' @details
 //' The function `areReachable` implements Algorithm 3.1 in Koller (2009, p. 75) and
-//' identifies nodes in `G` reachable from `x` given `Z` via active trails in `G`, with the restriction
-//' that all nodes on the trail are in `A`. 
+//' identifies nodes in `G` reachable from `x` given `Z` via an active trail in `G`, with the restriction
+//' that all nodes on the trail are in `A`.
 //' 
-//' The function `find_nearest_adjset` assumes `Z` is a set of nodes separating `x` and `y` in `Gx`, and returns the
-//' subset of `Z` reachable from `x` given `Z`, that is the subset of `Z` closest to `x`. 
+//' The function `find_nearest_adjset` is used to identify the `o-set` and minimal separators. 
+//' It assumes `Z` is a valid adjustment set (a set of nodes that includes no descendants of `x` and separates `x` and `y` in the backdoor graph),
+//' and returns the subset of `Z` reachable from `x` given `Z`. That is the subset of `Z` closest to `x`. 
 //' A minimal separator is found by applying `find_nearest_adjset` again w.r.t `y` and the reduced set.
 //' 
-//' The function `adjset` applies these algorithms to identify different adjustment set: 
+//' The function `find_adjset` applies these algorithms to identify different adjustment set: 
 //' 
-//' - "o": The optimal adjustment set (o-set). If `A` is the set of joint ancestors of `x` and `y` and `Z` equals `A` 
-//'   minus any descendant of `x`, the o-set includes all nodes that can be reached from `y` via active paths in `A`
-//'   given `Z`. That is the subset of `Z` closest to `y` on every path ending with an arrow into `y`.
+//' - "o": The optimal adjustment set (o-set). Given `A = Anc(x, y)`, the o-set is the set of nodes in `Z = A\Desc(x)` that can be reached from `y` via active paths in `A`.
 //' - "o-min": The minimal O-set. The subset of the o-set reachable from `x`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
-//' - "pa-min": The minimal parent set. The subset of the parents of `x` reachable from `y`, 
-//'   i.e. i.e. a minimal separator of `x` and `y` in the backdoor graph.
+//' - "pa-min": The minimal parent set. The subset of the parents of `x` reachable from `y`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
 //'   
 //' These adjustment sets are defined only when `x` is ancestor of `y`.
-//' If that is not the case, the function returns `y` indicating that `x` has no effect on `y`.
+//' If that is not the case, the function returns `y` indicating that $P(y|do(x)) = P(y)$, such that `x` has no causal effect on `y`.
 //' Additionally, 
 //' 
-//' - "pa": the set of parents of `x`, read of `G` directly, independently of wheter `x` is an ancestor of `y`.
-//' - "pa-if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise the function returns `y`.
-//' 
-//' For other values of `name` the function returns either `y` or `Z` (the joint set of descendants of `x` and `y` minus descendants of `x`),
-//' which is itself a valid adjustment set.
-
-void rcpp_rprintf(IntegerVector v){
-    // printing values of all the elements of Rcpp vector  
-    for(int i=0; i<v.length(); ++i){
-       Rprintf("the value of v[%i] : %i \n", i, v[i]);
-    }
- }
-
-void rcpp_rprintf_log(LogicalVector v){
-   // printing values of all the elements of Rcpp vector  
-   for(int i=0; i<v.length(); ++i){
-      Rprintf("the value of v[%i] : %i \n", i, v[i]);
-   }
-}
+//' - "pa": the parents of `x`, read of `G` directly.
+//' - "pa-if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
 
 
 // [[Rcpp::export]]
@@ -99,19 +80,11 @@ LogicalVector areFam(NumericMatrix G, IntegerVector nodes,  bool (*isFun)(Numeri
    return out;
 }
 
-//' @rdname adjset
-//' @export
-//' @returns
-//' - `areDescendants`: a logical `n`-length vector indicating which nodes are descendants of `nodes`.
 // [[Rcpp::export]]
 LogicalVector areDescendants(NumericMatrix G, IntegerVector nodes) {
    return areFam(G, nodes, isChild);
 }
 
-//' @rdname adjset
-//' @export
-//' @returns
-//' - `areAncestor`: a logical `n`-length vector indicating which nodes are ancestors of `nodes`.
 // [[Rcpp::export]]
 LogicalVector areAncestors(NumericMatrix G, IntegerVector nodes) {
    return areFam(G, nodes, isParent);
@@ -247,51 +220,59 @@ IntegerVector find_nearest_adjset(NumericMatrix Gx, int x, IntegerVector Z, Logi
 //' @return
 //' - `adjset`: an integer vector with the (zero-indexed) column positions of an adjustment set as given by `name`.
 // [[Rcpp::export]]
-IntegerVector adjset(NumericMatrix G, 
-                     int x, 
-                     int y, 
-                     String name, 
-                     NumericMatrix dmat = NumericMatrix(0)) {
-   
+IntegerVector find_adjset(NumericMatrix G, 
+                           int x, 
+                           int y, 
+                           String name, 
+                           NumericMatrix dmat = NumericMatrix(0),
+                           NumericMatrix Gx = NumericMatrix(0)) {
+
    int n = G.ncol();
-   IntegerVector Z = IntegerVector::create();  // initiate integer vector for adjustment set
+   IntegerVector Z = IntegerVector::create(); // init vector for adjustment set 
+   LogicalVector De(n);                       // init indicator for descendants
    
-   if (name == "pa") {
+   if (name != "pa") {
+      // return `y` if `y` is not a descendant of `x`
+      if (dmat.ncol() == n) {
+         De =  dmat(x, _) > 0;
+      } else {
+         De = areDescendants(G, IntegerVector(1, x));
+      }
+      if (De(y) == 0) {
+        // Rcout << "Y is not descendant of X \n";
+         return IntegerVector(1, y);
+      }
+   }
+   
+
+   if (name == "pa" || name == "pa-if" || name == "pa-min") {
+      // list all parents of `x`
       for (int i = 0; i < n; i++) {
          if (G(i, x) == 1) {
             Z.push_back(i);
          }
-      } 
-      return Z;
-   } 
+      }
+      if (name != "pa-min" || Z.length() == 0) {
+         return Z; 
+      }
+   }
    
+   // compute backdoor graph
+   if (Gx.ncol() != n) {
+      Gx = backdoorgraph(G, x);
+   }
    
-   // find relevant ancestor-relationships
-   LogicalVector De(n);    // descendants of x, forbidden nodes
-   LogicalVector A(n);     // common ancestors of x and y, potential confounders
+   // find common ancestors of x and y, potential confounders
+   LogicalVector A(n);     
    if (dmat.ncol() == n) {
-      // check if y is descendant of x
-      if (dmat(x, y) == 0){
-         return IntegerVector(1, y);
-      } 
-      De = dmat(x, _) > 0;
-      LogicalVector Ax = dmat(_, x) > 0;
-      LogicalVector Ay = dmat(_, y) > 0;
-      A  = Ax | Ay;
+      A  = dmat(_, x) + dmat(_, y) > 0;
    } else {
-      De = areDescendants(G, IntegerVector(1, x));
-      if (!De(y)){
-         return IntegerVector(1, y);
-      } 
       IntegerVector nodes = {x, y};
       A = areAncestors(G, nodes);
    }
-   
-   if (name == "pa-if") {
-      return adjset(G, x, y, "pa", false);
-   } else if (name == "pa-min") {
-      Z = adjset(G, x, y, "pa", false);
-      return find_nearest_adjset(backdoorgraph(G, x), y, Z, A);
+ 
+   if (name == "pa-min") {
+      return find_nearest_adjset(Gx, y, Z, A);
    } else {
       
       // list set of common ancestors minus descendants - potential confounders
@@ -301,22 +282,22 @@ IntegerVector adjset(NumericMatrix G,
          }
       }
       
-      if (Z.length() > 0) {
-         if (name == "o") {
-            return find_nearest_adjset(backdoorgraph(G, x), y, Z, A);
-         } else if (name == "o-min"){
-            NumericMatrix Gx = backdoorgraph(G, x);
-            Z = find_nearest_adjset(Gx, y, Z, A);      // o-set
-            return find_nearest_adjset(Gx, x, Z, A);   // minimal o-set
-         }
+      if (Z.length() == 0) {
+         return Z;
+      } else if (name == "o") {
+         return find_nearest_adjset(Gx, y, Z, A);
+      } else if (name == "o-min") {
+         Z = find_nearest_adjset(Gx, y, Z, A);         // o-set
+         return find_nearest_adjset(Gx, x, Z, A);  // minimal o-set
+      } else {
+         stop("Invalid value of argument `name`");
       }
-      
-      return Z;
    }
 }
 
 
 /*** R
+stop()
 # specify DAG row-wise:
 dag <- rbind(Z1  = c(0, 0, 0, 1, 0, 0, 0),
              Z2  = c(0, 0, 0, 1, 0, 0, 0),
@@ -343,7 +324,7 @@ find_nearest_adjset(dag, y, Z0, A)
 
 find_nearest_adjset(dag, x, find_nearest_adjset(dag, x, Z0, A), A)
 
-adjset(dag, y, x, "o-min")
+find_adjset(dag, y, x, "o-min")
 
 
 */

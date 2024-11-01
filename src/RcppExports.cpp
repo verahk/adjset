@@ -101,9 +101,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// adjset
-IntegerVector adjset(NumericMatrix G, int x, int y, String name, NumericMatrix dmat);
-RcppExport SEXP _adjset_adjset(SEXP GSEXP, SEXP xSEXP, SEXP ySEXP, SEXP nameSEXP, SEXP dmatSEXP) {
+// find_adjset
+IntegerVector find_adjset(NumericMatrix G, int x, int y, String name, NumericMatrix dmat, NumericMatrix Gx);
+RcppExport SEXP _adjset_find_adjset(SEXP GSEXP, SEXP xSEXP, SEXP ySEXP, SEXP nameSEXP, SEXP dmatSEXP, SEXP GxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -112,7 +112,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type y(ySEXP);
     Rcpp::traits::input_parameter< String >::type name(nameSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type dmat(dmatSEXP);
-    rcpp_result_gen = Rcpp::wrap(adjset(G, x, y, name, dmat));
+    Rcpp::traits::input_parameter< NumericMatrix >::type Gx(GxSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_adjset(G, x, y, name, dmat, Gx));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -125,7 +126,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_adjset_isDescendant", (DL_FUNC) &_adjset_isDescendant, 3},
     {"_adjset_areReachable", (DL_FUNC) &_adjset_areReachable, 4},
     {"_adjset_find_nearest_adjset", (DL_FUNC) &_adjset_find_nearest_adjset, 4},
-    {"_adjset_adjset", (DL_FUNC) &_adjset_adjset, 5},
+    {"_adjset_find_adjset", (DL_FUNC) &_adjset_find_adjset, 6},
     {NULL, NULL, 0}
 };
 

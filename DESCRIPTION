@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Vera", "Kvisgaard", , "verakvisgaard@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: The package contains algorithms coded in Rcpp for identifying adjustment sets in DAGs..
+Description: The package include Rcpp code for identifying different adjustment sets in a DAG.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -16,6 +16,7 @@ Imports:
 Suggests: 
     graph,
     pcalg,
+    boot,
     Rgraphviz,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

@@ -5,9 +5,9 @@ test_that("find_adjset returns the same sets as pcalg", {
   ## Check that adjustment sets returned by bida:::adjset_from_dag
   ## coincide with those from pcalg::optAdjSet (o-set) and pcalg::adjustment (minimal sets)
   
-  adjsets <- c("o", "o-min", "pa-min", "pa", "anc")
-  n <- 10
-  ngraphs <- 10
+  adjsets <- c("o", "o-min", "pa-min", "pa", "pa-if")
+  n <- 20
+  ngraphs <- 5
   verbose <- T
   
   for (g in 1:ngraphs){
@@ -19,17 +19,17 @@ test_that("find_adjset returns the same sets as pcalg", {
     
     #pcalg::plot(as(dag, "graphNEL"))
     for (x in 1:n){
+      pa <- unname(which(dag[, x] == 1))
       for (y in seq_len(n)[-x]){
         if (verbose) cat("\n dag:", g, "x:", x, "y:", y)
-        adjsets <- c("anc", "o", "o-min", "pa-if", "pa-min")
-        sets <- lapply(adjsets, function(a) adjset(dag, x-1, y-1, a)+1)
+        sets <- lapply(adjsets, function(a) find_adjset(dag, x-1, y-1, a)+1)
         names(sets) <- adjsets
         
+        expect_equal(sets$pa, pa)
+        sets$pa <- NULL
         if (dmat[x, y] == 0) {
           expect_equal(unique(sets), list(y))
         } else {
-          expect_equal(sets$anc, 
-                       unname(which(replace(dmat[, x] | dmat[, y] & !dmat[x, ],  x, FALSE))))
           expect_equal(sets$o, sort(pcalg::optAdjSet(tdag, x, y)))
           expect_equal(sets$`pa-if`, unname(which(dag[, x] == 1)))
           
@@ -74,7 +74,7 @@ test_that("find_adjset returns the same sets as pcalg", {
             cat("\nNodes in Z0 reachable from y")
             Z0[areReachable(bdag, y-1, Z0-1, dmat[, x] | dmat[, y])[Z0]]
             find_nearest_adjset(bdag, y-1, sets$anc-1, dmat[, x] | dmat[, y])+1
-            adjset(dag, x-1, y-1, "o")
+            find_adjset(dag, x-1, y-1, "o")
           }
         }
       }
