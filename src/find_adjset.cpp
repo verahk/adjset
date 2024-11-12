@@ -297,7 +297,7 @@ IntegerVector find_adjset(NumericMatrix G,
 
 
 /*** R
-stop()
+
 # specify DAG row-wise:
 dag <- rbind(Z1  = c(0, 0, 0, 1, 0, 0, 0),
              Z2  = c(0, 0, 0, 1, 0, 0, 0),
