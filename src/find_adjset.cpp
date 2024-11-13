@@ -36,15 +36,15 @@ using namespace Rcpp;
 //' The function `find_adjset` applies these algorithms to identify different adjustment set: 
 //' 
 //' - "o": The optimal adjustment set (o-set). Given `A = Anc(x, y)`, the o-set is the set of nodes in `Z = A\Desc(x)` that can be reached from `y` via active paths in `A`.
-//' - "o-min": The minimal O-set. The subset of the o-set reachable from `x`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
-//' - "pa-min": The minimal parent set. The subset of the parents of `x` reachable from `y`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
+//' - "o_min": The minimal O-set. The subset of the o-set reachable from `x`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
+//' - "pa_min": The minimal parent set. The subset of the parents of `x` reachable from `y`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
 //'   
 //' These adjustment sets are defined only when `x` is ancestor of `y`.
 //' If that is not the case, the function returns `y` indicating that $P(y|do(x)) = P(y)$, such that `x` has no causal effect on `y`.
 //' Additionally, 
 //' 
 //' - "pa": the parents of `x`, read of `G` directly.
-//' - "pa-if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
+//' - "pa_if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
 
 
 // [[Rcpp::export]]
@@ -232,7 +232,6 @@ IntegerVector find_adjset(NumericMatrix G,
    LogicalVector De(n);                       // init indicator for descendants
    
    if (name != "pa") {
-      // return `y` if `y` is not a descendant of `x`
       if (dmat.ncol() == n) {
          De =  dmat(x, _) > 0;
       } else {
@@ -240,19 +239,20 @@ IntegerVector find_adjset(NumericMatrix G,
       }
       if (De(y) == 0) {
         // Rcout << "Y is not descendant of X \n";
-         return IntegerVector(1, y);
+        // return `y` if `y` is not a descendant of `x`
+        return IntegerVector(1, y);
       }
    }
    
 
-   if (name == "pa" || name == "pa-if" || name == "pa-min") {
+   if (name == "pa" || name == "pa_if" || name == "pa_min") {
       // list all parents of `x`
       for (int i = 0; i < n; i++) {
          if (G(i, x) == 1) {
             Z.push_back(i);
          }
       }
-      if (name != "pa-min" || Z.length() == 0) {
+      if (name != "pa_min" || Z.length() == 0) {
          return Z; 
       }
    }
@@ -271,7 +271,7 @@ IntegerVector find_adjset(NumericMatrix G,
       A = areAncestors(G, nodes);
    }
  
-   if (name == "pa-min") {
+   if (name == "pa_min") {
       return find_nearest_adjset(Gx, y, Z, A);
    } else {
       
@@ -286,8 +286,8 @@ IntegerVector find_adjset(NumericMatrix G,
          return Z;
       } else if (name == "o") {
          return find_nearest_adjset(Gx, y, Z, A);
-      } else if (name == "o-min") {
-         Z = find_nearest_adjset(Gx, y, Z, A);         // o-set
+      } else if (name == "o_min") {
+         Z = find_nearest_adjset(Gx, y, Z, A);     // o-set
          return find_nearest_adjset(Gx, x, Z, A);  // minimal o-set
       } else {
          stop("Invalid value of argument `name`");
@@ -324,7 +324,7 @@ find_nearest_adjset(dag, y, Z0, A)
 
 find_nearest_adjset(dag, x, find_nearest_adjset(dag, x, Z0, A), A)
 
-find_adjset(dag, y, x, "o-min")
+find_adjset(dag, y, x, "o_min")
 
 
 */

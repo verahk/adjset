@@ -35,15 +35,15 @@
 #' The function `find_adjset` applies these algorithms to identify different adjustment set: 
 #' 
 #' - "o": The optimal adjustment set (o-set). Given `A = Anc(x, y)`, the o-set is the set of nodes in `Z = A\Desc(x)` that can be reached from `y` via active paths in `A`.
-#' - "o-min": The minimal O-set. The subset of the o-set reachable from `x`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
-#' - "pa-min": The minimal parent set. The subset of the parents of `x` reachable from `y`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
+#' - "o_min": The minimal O-set. The subset of the o-set reachable from `x`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
+#' - "pa_min": The minimal parent set. The subset of the parents of `x` reachable from `y`, i.e. a minimal separator of `x` and `y` in the backdoor graph.
 #'   
 #' These adjustment sets are defined only when `x` is ancestor of `y`.
 #' If that is not the case, the function returns `y` indicating that $P(y|do(x)) = P(y)$, such that `x` has no causal effect on `y`.
 #' Additionally, 
 #' 
 #' - "pa": the parents of `x`, read of `G` directly.
-#' - "pa-if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
+#' - "pa_if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
 NULL
 
 isParent <- function(G, x, y) {

@@ -5,7 +5,7 @@ test_that("find_adjset returns the same sets as pcalg", {
   ## Check that adjustment sets returned by bida:::adjset_from_dag
   ## coincide with those from pcalg::optAdjSet (o-set) and pcalg::adjustment (minimal sets)
   
-  adjsets <- c("o", "o-min", "pa-min", "pa", "pa-if")
+  adjsets <- c("o", "o_min", "pa_min", "pa", "pa_if")
   n <- 20
   ngraphs <- 5
   verbose <- T
@@ -31,7 +31,7 @@ test_that("find_adjset returns the same sets as pcalg", {
           expect_equal(unique(sets), list(y))
         } else {
           expect_equal(sets$o, sort(pcalg::optAdjSet(tdag, x, y)))
-          expect_equal(sets$`pa-if`, unname(which(dag[, x] == 1)))
+          expect_equal(sets$`pa_if`, unname(which(dag[, x] == 1)))
           
           # compute all minimum sets
           min <- pcalg::adjustment(tdag, "dag", x, y, "minimal") 
@@ -39,8 +39,8 @@ test_that("find_adjset returns the same sets as pcalg", {
           o_equal <- pa_equal <- FALSE
           for (z in min) {
             z <- sort(z)
-            if (!o_equal)  o_equal <- length(sets$`o-min`) == length(z) && all(sets$`o-min`== z)
-            if (!pa_equal) pa_equal <- length(sets$`pa-min`) == length(z) && all(sets$`pa-min` == z)
+            if (!o_equal)  o_equal <- length(sets$`o_min`) == length(z) && all(sets$`o_min`== z)
+            if (!pa_equal) pa_equal <- length(sets$`pa_min`) == length(z) && all(sets$`pa_min` == z)
             if (o_equal && pa_equal) break
           }
           
