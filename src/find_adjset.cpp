@@ -45,6 +45,8 @@ using namespace Rcpp;
 //' 
 //' - "pa": the parents of `x`, read of `G` directly.
 //' - "pa_if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
+//' 
+//' If `name` do not match any of the above, then `Z = A\Desc(x)` is returned.
 
 
 // [[Rcpp::export]]
@@ -290,7 +292,7 @@ IntegerVector find_adjset(NumericMatrix G,
          Z = find_nearest_adjset(Gx, y, Z, A);     // o-set
          return find_nearest_adjset(Gx, x, Z, A);  // minimal o-set
       } else {
-         stop("Invalid value of argument `name`");
+         return Z;
       }
    }
 }

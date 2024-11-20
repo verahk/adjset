@@ -67,8 +67,8 @@ A minimal separator is found by applying \code{find_nearest_adjset} again w.r.t 
 The function \code{find_adjset} applies these algorithms to identify different adjustment set:
 \itemize{
 \item "o": The optimal adjustment set (o-set). Given \code{A = Anc(x, y)}, the o-set is the set of nodes in \verb{Z = A\\Desc(x)} that can be reached from \code{y} via active paths in \code{A}.
-\item "o-min": The minimal O-set. The subset of the o-set reachable from \code{x}, i.e. a minimal separator of \code{x} and \code{y} in the backdoor graph.
-\item "pa-min": The minimal parent set. The subset of the parents of \code{x} reachable from \code{y}, i.e. a minimal separator of \code{x} and \code{y} in the backdoor graph.
+\item "o_min": The minimal O-set. The subset of the o-set reachable from \code{x}, i.e. a minimal separator of \code{x} and \code{y} in the backdoor graph.
+\item "pa_min": The minimal parent set. The subset of the parents of \code{x} reachable from \code{y}, i.e. a minimal separator of \code{x} and \code{y} in the backdoor graph.
 }
 
 These adjustment sets are defined only when \code{x} is ancestor of \code{y}.
@@ -76,6 +76,6 @@ If that is not the case, the function returns \code{y} indicating that $P(y|do(x
 Additionally,
 \itemize{
 \item "pa": the parents of \code{x}, read of \code{G} directly.
-\item "pa-if": if \code{y} is a descendant of \code{x}, then the set of parents is returned. Otherwise \code{y} is returned.
+\item "pa_if": if \code{y} is a descendant of \code{x}, then the set of parents is returned. Otherwise \code{y} is returned.
 }
 }

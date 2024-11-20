@@ -49,9 +49,10 @@ colnames(dag) <- rownames(dag)
 # compute adjustment set w.r.t. X and Y
 x <- 4
 y <- 6
-adjsets <- c("anc", "pa","pa-min", "o", "o-min")
+adjsets <- c("anc", "pa","pa_min", "o", "o_min")
+for (a in adjsets)find_adjset(dag, x-1, y-1, a)+1
 sets <- lapply(adjsets,
-               function(a) adjset(dag, x-1, y-1, a)+1)
+               function(a) find_adjset(dag, x-1, y-1, a)+1)
 names(sets) <- adjsets
 sets
 
@@ -76,11 +77,11 @@ for (a in names(sets)) {
 
 # compare runtimes with alternative routines
 microbenchmark::microbenchmark(pcalg::optAdjSet(t(dag), x, y),
-                               adjset(dag, x-1, y-1, "o")+1,
+                               find_adjset(dag, x-1, y-1, "o")+1,
                                check = "equivalent")
 
 microbenchmark::microbenchmark(which(dag[, x] == 1),
-                               adjset(dag, x-1, y-1, "pa")+1,
+                               find_adjset(dag, x-1, y-1, "pa")+1,
                                check = "equivalent")
 ```
 

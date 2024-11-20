@@ -44,6 +44,8 @@
 #' 
 #' - "pa": the parents of `x`, read of `G` directly.
 #' - "pa_if": if `y` is a descendant of `x`, then the set of parents is returned. Otherwise `y` is returned.
+#' 
+#' If `name` do not match any of the above, then `Z = A\Desc(x)` is returned.
 NULL
 
 isParent <- function(G, x, y) {
